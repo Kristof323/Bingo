@@ -7,6 +7,8 @@ using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Linq;
+
 
 namespace BingoGUI
 {
@@ -93,8 +95,10 @@ namespace BingoGUI
                 return;
             }
 
-            var path = (FileNameTextBox.Text ?? "").Trim();
-            if (string.IsNullOrWhiteSpace(path))
+            var filename = (FileNameTextBox.Text ?? "bingo.txt").Trim();
+            var path = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, filename);
+
+            if (string.IsNullOrWhiteSpace(filename))
             {
                 MessageBox.Show("Adj meg fájlnevet (pl. bingo.txt)!",
                     "Hiba", MessageBoxButton.OK, MessageBoxImage.Warning);
@@ -117,7 +121,7 @@ namespace BingoGUI
 
             try
             {
-                File.WriteAllText(path, sb.ToString(), Encoding.UTF8);
+                System.IO.File.WriteAllText(path, sb.ToString(), System.Text.Encoding.UTF8);
                 MessageBox.Show($"Mentve: {path}", "Siker", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)
@@ -125,6 +129,7 @@ namespace BingoGUI
                 MessageBox.Show($"Mentési hiba: {ex.Message}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
 
         private bool ValidateFilled()
         {
@@ -147,15 +152,17 @@ namespace BingoGUI
 
         private void LoadPlayerListButton_Click(object sender, RoutedEventArgs e)
         {
-            var path = (PlayerNameTextBox.Text ?? "").Trim();
-            if (string.IsNullOrWhiteSpace(path))
+            var filename = (PlayerNameTextBox.Text ?? "").Trim();
+            var path = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, filename);
+
+            if (string.IsNullOrWhiteSpace(filename))
             {
                 MessageBox.Show("Adj meg nevek fájlt (pl. nevek.text)!",
                     "Hiba", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            if (!File.Exists(path))
+            if (!System.IO.File.Exists(path))
             {
                 MessageBox.Show($"A fájl nem található: {path}",
                     "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -183,13 +190,6 @@ namespace BingoGUI
             }
         }
 
-        private string[] LoadNameList(string path)
-        {
-            return File.ReadAllLines(path, Encoding.UTF8)
-                .Select(s => s.Trim())
-                .Where(s => s.Length > 0)
-                .ToArray();
-        }
 
         private void PlayerComboBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
@@ -216,6 +216,15 @@ namespace BingoGUI
                     "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
+        private string[] LoadNameList(string path)
+        {
+            return System.IO.File.ReadAllLines(path, System.Text.Encoding.UTF8)
+                .Select(s => s.Trim())
+                .Where(s => s.Length > 0)
+                .ToArray();
+        }
+
 
         private void LoadCardFromFile(string path)
         {
